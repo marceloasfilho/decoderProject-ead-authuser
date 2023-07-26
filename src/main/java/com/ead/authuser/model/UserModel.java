@@ -1,4 +1,4 @@
-package com.ead.authuser.models;
+package com.ead.authuser.model;
 
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
