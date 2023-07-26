@@ -3,12 +3,14 @@ package com.ead.authuser.controller;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.enums.UserStatus;
 import com.ead.authuser.enums.UserType;
-import com.ead.authuser.models.UserModel;
+import com.ead.authuser.model.UserModel;
 import com.ead.authuser.service.UserService;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,13 +25,13 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> registerUser(@RequestBody @JsonView(UserDTO.UserView.RegisterUser.class) @Validated(UserDTO.UserView.RegisterUser.class) UserDTO userDTO) {
 
-        if (this.userService.existsByUsername(userDTO.getUsername())){
+        if (this.userService.existsByUsername(userDTO.getUsername())) {
             return new ResponseEntity<>("ERROR: Username already taken!", HttpStatus.CONFLICT);
         }
 
-        if (this.userService.existsByEmail(userDTO.getEmail())){
+        if (this.userService.existsByEmail(userDTO.getEmail())) {
             return new ResponseEntity<>("ERROR: Email already taken!", HttpStatus.CONFLICT);
         }
 
