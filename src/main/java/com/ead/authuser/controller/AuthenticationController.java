@@ -29,11 +29,15 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody @JsonView(UserDTO.UserView.RegisterUser.class) @Validated(UserDTO.UserView.RegisterUser.class) UserDTO userDTO) {
 
+        log.debug("POST registerUser UserDTO received {}", userDTO.toString());
+
         if (this.userService.existsByUsername(userDTO.getUsername())) {
+            log.warn("Username {} already taken", userDTO.getUsername());
             return new ResponseEntity<>("ERROR: Username already taken!", HttpStatus.CONFLICT);
         }
 
         if (this.userService.existsByEmail(userDTO.getEmail())) {
+            log.warn("Email {} already taken", userDTO.getEmail());
             return new ResponseEntity<>("ERROR: Email already taken!", HttpStatus.CONFLICT);
         }
 
@@ -44,6 +48,8 @@ public class AuthenticationController {
         userModel.setCreationDateTime(LocalDateTime.now(ZoneId.of("UTC")));
         userModel.setLastUpdateDateTime(LocalDateTime.now(ZoneId.of("UTC")));
         this.userService.save(userModel);
+        log.debug("POST registerUser userModel saved {}", userModel.toString());
+        log.info("User {} saved successfully", userModel.getUserId());
         return new ResponseEntity<>(userModel, HttpStatus.CREATED);
     }
 
@@ -54,6 +60,13 @@ public class AuthenticationController {
         log.info("INFO - AMBIENTE DE PRD, INFORMAÇÕES DE PROCESSOS RELEVANTE PARA ARQUITETURA, SEM MUITA GRANULARIDADE");
         log.warn("WARN - PERDA DE DADOS SECUNDÁRIOS, PROCESSOS QUE OCORREM MAIS DE UMA VEZ (NÃO CHEGA A SER CONSIDERADO UM ERRO");
         log.error("ERROR - MUITO UTILIZADO EM BLOCOS TRY CATCH, ESTRUTURAR ERROS NO SISTEMA");
+
+        try {
+            Integer.parseInt("aa");
+        } catch (Exception e) {
+            log.error("----ERROR----", e);
+        }
+
         return "Logging Spring Boot...";
     }
 }

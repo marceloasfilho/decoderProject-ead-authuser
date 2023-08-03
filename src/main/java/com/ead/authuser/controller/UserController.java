@@ -6,6 +6,7 @@ import com.ead.authuser.service.UserService;
 import com.ead.authuser.specification.SpecificationTemplate;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+@Log4j2
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/user")
@@ -63,9 +65,12 @@ public class UserController {
 
     @PutMapping("/updateUser/{userId}")
     public ResponseEntity<?> updateUser(@PathVariable(value = "userId") UUID userId, @RequestBody @JsonView(UserDTO.UserView.UpdateUser.class) @Validated(UserDTO.UserView.UpdateUser.class) UserDTO userDTO) {
+
+        log.debug("PUT updateUser userDTO saved {}", userDTO.toString());
         Optional<UserModel> userById = this.userService.findById(userId);
 
         if (userById.isEmpty()) {
+            log.warn("User {} not found", userId);
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
@@ -75,6 +80,9 @@ public class UserController {
         userModel.setCpf(userDTO.getCpf());
         userModel.setLastUpdateDateTime(LocalDateTime.now(ZoneId.of("UTC")));
         this.userService.save(userModel);
+
+        log.debug("PUT registerUser userModel saved {}", userModel.toString());
+        log.info("User {} saved successfully", userModel.getUserId());
 
         return new ResponseEntity<>(userModel, HttpStatus.OK);
     }
