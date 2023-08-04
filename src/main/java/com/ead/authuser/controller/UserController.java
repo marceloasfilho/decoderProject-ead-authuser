@@ -3,7 +3,6 @@ package com.ead.authuser.controller;
 import com.ead.authuser.dto.UserDTO;
 import com.ead.authuser.model.UserModel;
 import com.ead.authuser.service.UserService;
-import com.ead.authuser.specification.SpecificationTemplate;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,6 +20,8 @@ import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.ead.authuser.specification.SpecificationTemplate.UserSpec;
+import static com.ead.authuser.specification.SpecificationTemplate.userCourseId;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -33,8 +34,18 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/list")
-    public ResponseEntity<Page<UserModel>> getAllUsers(SpecificationTemplate.UserSpec userSpec, @PageableDefault(sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<UserModel> userModelPage = this.userService.findAll(userSpec, pageable);
+    public ResponseEntity<Page<UserModel>> getAllUsers(
+            UserSpec userSpec,
+            @PageableDefault(sort = "userId", direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestParam(required = false) UUID courseId) {
+
+        Page<UserModel> userModelPage;
+
+        if (courseId != null) {
+            userModelPage = this.userService.findAll(userCourseId(courseId).and(userSpec), pageable);
+        } else {
+            userModelPage = this.userService.findAll(userSpec, pageable);
+        }
 
         if (!userModelPage.isEmpty()) {
             for (UserModel userModel : userModelPage.toList()) {
@@ -64,9 +75,11 @@ public class UserController {
     }
 
     @PutMapping("/updateUser/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable(value = "userId") UUID userId, @RequestBody @JsonView(UserDTO.UserView.UpdateUser.class) @Validated(UserDTO.UserView.UpdateUser.class) UserDTO userDTO) {
+    public ResponseEntity<?> updateUser(
+            @PathVariable(value = "userId") UUID userId,
+            @RequestBody @JsonView(UserDTO.UserView.UpdateUser.class) @Validated(UserDTO.UserView.UpdateUser.class) UserDTO userDTO) {
 
-        log.debug("PUT updateUser userDTO saved {}", userDTO.toString());
+        log.debug("PUT updateUser userId saved {}", userDTO.getUserId());
         Optional<UserModel> userById = this.userService.findById(userId);
 
         if (userById.isEmpty()) {
@@ -81,14 +94,16 @@ public class UserController {
         userModel.setLastUpdateDateTime(LocalDateTime.now(ZoneId.of("UTC")));
         this.userService.save(userModel);
 
-        log.debug("PUT registerUser userModel saved {}", userModel.toString());
+        log.debug("PUT registerUser userId saved {}", userModel.getUserId());
         log.info("User {} saved successfully", userModel.getUserId());
 
         return new ResponseEntity<>(userModel, HttpStatus.OK);
     }
 
     @PutMapping("/updatePassword/{userId}")
-    public ResponseEntity<?> updatePassword(@PathVariable(value = "userId") UUID userId, @RequestBody @JsonView(UserDTO.UserView.UpdatePassword.class) @Validated(UserDTO.UserView.UpdatePassword.class) UserDTO userDTO) {
+    public ResponseEntity<?> updatePassword(
+            @PathVariable(value = "userId") UUID userId,
+            @RequestBody @JsonView(UserDTO.UserView.UpdatePassword.class) @Validated(UserDTO.UserView.UpdatePassword.class) UserDTO userDTO) {
         Optional<UserModel> userById = this.userService.findById(userId);
 
         if (userById.isEmpty()) {
@@ -108,7 +123,9 @@ public class UserController {
     }
 
     @PutMapping("/updateImageUrl/{userId}")
-    public ResponseEntity<?> updateImageUrl(@PathVariable(value = "userId") UUID userId, @RequestBody @JsonView(UserDTO.UserView.UpdateImageUrl.class) @Validated(UserDTO.UserView.UpdateImageUrl.class) UserDTO userDTO) {
+    public ResponseEntity<?> updateImageUrl(
+            @PathVariable(value = "userId") UUID userId,
+            @RequestBody @JsonView(UserDTO.UserView.UpdateImageUrl.class) @Validated(UserDTO.UserView.UpdateImageUrl.class) UserDTO userDTO) {
         Optional<UserModel> userById = this.userService.findById(userId);
 
         if (userById.isEmpty()) {
