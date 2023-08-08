@@ -26,7 +26,7 @@ public class UserCourseController {
     @GetMapping("/{userId}/courses")
     public ResponseEntity<Page<CourseDTO>> getAllCoursesByUser(
             @PageableDefault(sort = "courseId", direction = Sort.Direction.ASC) Pageable pageable,
-            @PathVariable(required = false) UUID userId) {
+            @PathVariable(value = "userId") UUID userId) {
 
         Page<CourseDTO> allCoursesByUser = this.userClient.getAllCoursesByUser(userId, pageable);
         return new ResponseEntity<>(allCoursesByUser, HttpStatus.OK);
