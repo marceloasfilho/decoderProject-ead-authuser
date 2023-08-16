@@ -16,6 +16,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Component
@@ -25,6 +26,7 @@ public class UserClient {
 
     private final RestTemplate restTemplate;
     private final UtilsService utilsService;
+
     public Page<CourseDTO> getAllCoursesByUser(UUID userId, Pageable pageable) {
         String url = this.utilsService.buildUrl(userId, pageable);
         log.debug("Request URL: {}", url);
@@ -36,7 +38,7 @@ public class UserClient {
             ParameterizedTypeReference<ResponseGetAllCoursesByUserDTO<CourseDTO>> httpResponse = new ParameterizedTypeReference<>() {
             };
             ResponseEntity<ResponseGetAllCoursesByUserDTO<CourseDTO>> bodyResponse = this.restTemplate.exchange(url, HttpMethod.GET, null, httpResponse);
-            allCoursesByUser = bodyResponse.getBody().getContent();
+            allCoursesByUser = Objects.requireNonNull(bodyResponse.getBody()).getContent();
         } catch (HttpStatusCodeException httpStatusCodeException) {
             allCoursesByUser = null;
             log.error("Error request /course", httpStatusCodeException);
@@ -44,6 +46,6 @@ public class UserClient {
 
         log.info("Ending request /course userId: {}", userId);
 
-        return new PageImpl<>(allCoursesByUser);
+        return new PageImpl<>(Objects.requireNonNull(allCoursesByUser));
     }
 }
