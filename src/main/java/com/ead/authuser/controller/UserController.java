@@ -70,7 +70,7 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        this.userService.deleteById(userById.get().getUserId());
+        this.userService.delete(userById.get());
         return new ResponseEntity<>("user deleted successfully", HttpStatus.OK);
     }
 

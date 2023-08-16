@@ -1,6 +1,8 @@
 package com.ead.authuser.service.impl;
 
+import com.ead.authuser.model.UserCourseModel;
 import com.ead.authuser.model.UserModel;
+import com.ead.authuser.repository.UserCourseRepository;
 import com.ead.authuser.repository.UserRepository;
 import com.ead.authuser.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,20 +19,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-
-    @Override
-    public List<UserModel> findAll() {
-        return this.userRepository.findAll();
-    }
+    private final UserCourseRepository userCourseRepository;
 
     @Override
     public Optional<UserModel> findById(UUID userId) {
         return this.userRepository.findById(userId);
-    }
-
-    @Override
-    public void deleteById(UUID userId) {
-        this.userRepository.deleteById(userId);
     }
 
     @Override
@@ -49,7 +42,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-        public Page<UserModel> findAll(Specification<UserModel> specification, Pageable pageable) {
+    public Page<UserModel> findAll(Specification<UserModel> specification, Pageable pageable) {
         return this.userRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public void delete(UserModel userModel) {
+        List<UserCourseModel> allUserCourseIntoUser = this.userCourseRepository.findAllUserCourseIntoUser(userModel.getUserId());
+        if (!allUserCourseIntoUser.isEmpty()) {
+            this.userCourseRepository.deleteAll(allUserCourseIntoUser);
+        }
+        this.userRepository.delete(userModel);
     }
 }
