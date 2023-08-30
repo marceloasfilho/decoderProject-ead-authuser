@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
@@ -63,6 +64,7 @@ public class UserController {
     }
 
     @DeleteMapping("/deleteUser/{userId}")
+    @Transactional
     public ResponseEntity<?> deleteUserById(@PathVariable(value = "userId") UUID userId) {
         Optional<UserModel> userById = this.userService.findById(userId);
 
