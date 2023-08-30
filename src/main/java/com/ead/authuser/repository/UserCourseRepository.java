@@ -12,6 +12,10 @@ import java.util.UUID;
 public interface UserCourseRepository extends JpaRepository<UserCourseModel, UUID> {
     boolean existsByUserModelAndCourseId(UserModel userModel, UUID courseId);
 
-    @Query(value = "SELECT * FROM tb_user_course WHERE user_id=: userId", nativeQuery = true)
+    @Query(value = "SELECT * FROM tb_user_course WHERE user_id =:userId", nativeQuery = true)
     List<UserCourseModel> findAllUserCourseIntoUser(@Param("userId") UUID userId);
+
+    boolean existsByCourseId(UUID courseId);
+
+    void deleteAllByCourseId(UUID courseId);
 }

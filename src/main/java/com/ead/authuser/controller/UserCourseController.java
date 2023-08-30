@@ -1,6 +1,6 @@
 package com.ead.authuser.controller;
 
-import com.ead.authuser.client.UserClient;
+import com.ead.authuser.client.CourseClient;
 import com.ead.authuser.dto.CourseDTO;
 import com.ead.authuser.dto.UserCourseDTO;
 import com.ead.authuser.model.UserCourseModel;
@@ -28,17 +28,24 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserCourseController {
 
-    private final UserClient userClient;
+    private final CourseClient courseClient;
     private final UserService userService;
     private final UserCourseService userCourseService;
 
     @GetMapping("/{userId}/courses")
-    public ResponseEntity<Page<CourseDTO>> getAllCoursesByUser(
+    public ResponseEntity<?> getAllCoursesByUser(
             @PageableDefault(sort = "courseId", direction = Sort.Direction.ASC) Pageable pageable,
             @PathVariable(value = "userId") UUID userId) {
 
-        Page<CourseDTO> allCoursesByUser = this.userClient.getAllCoursesByUser(userId, pageable);
-        return new ResponseEntity<>(allCoursesByUser, HttpStatus.OK);
+        Optional<UserModel> userById = this.userService.findById(userId);
+        if (userById.isEmpty()) {
+            return new ResponseEntity<>("ERROR: User not found", HttpStatus.NOT_FOUND);
+        }
+
+        Page<CourseDTO> allCoursesByUser = this.courseClient.getAllCoursesByUser(userId, pageable);
+        return allCoursesByUser.isEmpty() ?
+        new ResponseEntity<>("User is not enrolled in any course", HttpStatus.NOT_FOUND) :
+        new ResponseEntity<>(allCoursesByUser, HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/courses/enroll")
@@ -59,5 +66,15 @@ public class UserCourseController {
 
         UserCourseModel saved = this.userCourseService.save(userCourseModel);
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/course/{courseId}")
+    public ResponseEntity<?> deleteUserCourseByCourse(@PathVariable(value = "courseId") UUID courseId) {
+        if (!this.userCourseService.existsByCourseId(courseId)) {
+            return new ResponseEntity<>("ERROR: UserCourse not found", HttpStatus.NOT_FOUND);
+        }
+
+        this.userCourseService.deleteUserCourseByCourseId(courseId);
+        return new ResponseEntity<>("UserCourse deleted successfully", HttpStatus.OK);
     }
 }

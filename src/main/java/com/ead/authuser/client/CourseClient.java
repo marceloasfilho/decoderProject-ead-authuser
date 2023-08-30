@@ -22,7 +22,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 @Log4j2
-public class UserClient {
+public class CourseClient {
 
     private final RestTemplate restTemplate;
     private final UtilsService utilsService;
@@ -47,5 +47,10 @@ public class UserClient {
         log.info("Ending request /course userId: {}", userId);
 
         return new PageImpl<>(Objects.requireNonNull(allCoursesByUser));
+    }
+
+    public void deleteCourseUserIntoCourse(UUID userId) {
+        String url = this.utilsService.createUrlDeleteCourseUserIntoCourse(userId);
+        this.restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
     }
 }
