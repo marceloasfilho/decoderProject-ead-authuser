@@ -1,9 +1,7 @@
 package com.ead.authuser.service.impl;
 
 import com.ead.authuser.client.CourseClient;
-import com.ead.authuser.model.UserCourseModel;
 import com.ead.authuser.model.UserModel;
-import com.ead.authuser.repository.UserCourseRepository;
 import com.ead.authuser.repository.UserRepository;
 import com.ead.authuser.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,7 +18,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final UserCourseRepository userCourseRepository;
     private final CourseClient courseClient;
 
     @Override
@@ -52,18 +48,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(UserModel userModel) {
-
-        boolean deleteCourseUserIntoCourse = false;
-
-        List<UserCourseModel> allUserCourseIntoUser = this.userCourseRepository.findAllUserCourseIntoUser(userModel.getUserId());
-        if (!allUserCourseIntoUser.isEmpty()) {
-            deleteCourseUserIntoCourse = true;
-            this.userCourseRepository.deleteAll(allUserCourseIntoUser);
-        }
         this.userRepository.delete(userModel);
-
-        if (deleteCourseUserIntoCourse){
-            this.courseClient.deleteCourseUserIntoCourse(userModel.getUserId());
-        }
     }
 }

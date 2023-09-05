@@ -48,9 +48,4 @@ public class CourseClient {
 
         return new PageImpl<>(Objects.requireNonNull(allCoursesByUser));
     }
-
-    public void deleteCourseUserIntoCourse(UUID userId) {
-        String url = this.utilsService.createUrlDeleteCourseUserIntoCourse(userId);
-        this.restTemplate.exchange(url, HttpMethod.DELETE, null, String.class);
-    }
 }

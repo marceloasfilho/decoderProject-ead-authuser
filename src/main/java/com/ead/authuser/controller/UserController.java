@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.ead.authuser.specification.SpecificationTemplate.UserSpec;
-import static com.ead.authuser.specification.SpecificationTemplate.userCourseId;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -37,16 +36,9 @@ public class UserController {
     @GetMapping("/list")
     public ResponseEntity<Page<UserModel>> getAllUsers(
             UserSpec userSpec,
-            @PageableDefault(sort = "userId", direction = Sort.Direction.ASC) Pageable pageable,
-            @RequestParam(required = false) UUID courseId) {
+            @PageableDefault(sort = "userId", direction = Sort.Direction.ASC) Pageable pageable) {
 
-        Page<UserModel> userModelPage;
-
-        if (courseId != null) {
-            userModelPage = this.userService.findAll(userCourseId(courseId).and(userSpec), pageable);
-        } else {
-            userModelPage = this.userService.findAll(userSpec, pageable);
-        }
+        Page<UserModel> userModelPage = this.userService.findAll(userSpec, pageable);
 
         if (!userModelPage.isEmpty()) {
             for (UserModel userModel : userModelPage.toList()) {
